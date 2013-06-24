@@ -65,7 +65,11 @@
   "Return the port from the port list given by the port name."
   [name]
   (let [name (str/lower-case name)]
-    (first (filter #(str/lower-case (.getName %)) (ports)))))
+    (first (filter #(= (-> (.getName %) 
+                         str/lower-case 
+                         (subs (- (count (.getName %)) (count name))))
+                       name)
+                   (ports)))))
 
 (defn open
   "open a port given port name and other parameters and return the por."
@@ -103,7 +107,7 @@
                             (loop [len (.available in)
                                    total 0
                                   count (.read in buffer total len)]
-                              (if (and len (< total BUFFER-MAX-LEN))
+                              (if (and (> len 0) (< total BUFFER-MAX-LEN))
                                 (let [total (+ total count)]
                                   (recur (.available in)
                                          total
